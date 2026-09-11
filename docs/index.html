@@ -1,0 +1,276 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Slop check — a ship gate for design</title>
+<meta name="description" content="Twelve questions that catch AI-generated design slop before you ship. Distilled from ~2,600 Awwwards Site-of-the-Day winners and real client rejections.">
+<link rel="canonical" href="https://systemonster.github.io/slop-check/">
+<meta property="og:title" content="Slop check — a ship gate for design">
+<meta property="og:description" content="Twelve questions that catch AI-generated design slop before you ship.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://systemonster.github.io/slop-check/">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<style>
+  :root{
+    --ink:#14140F; --paper:#F7F4EC; --paper-2:#EFEBE0;
+    --body:#4A4A40; --rule:#D8D2C4; --signal:#C0360F; --keep:#2F6B4F;
+    --serif:"Instrument Serif",Georgia,"Times New Roman",serif;
+    --sans:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
+    --mono:"IBM Plex Mono",ui-monospace,"SF Mono",Menlo,monospace;
+    --measure:34rem;
+  }
+  @media (prefers-color-scheme:dark){
+    :root:not([data-theme="light"]){
+      --ink:#F2EEE4; --paper:#131310; --paper-2:#1B1B16;
+      --body:#A9A497; --rule:#2E2E26; --signal:#F0713F; --keep:#6FB58F;
+    }
+  }
+  :root[data-theme="dark"]{
+    --ink:#F2EEE4; --paper:#131310; --paper-2:#1B1B16;
+    --body:#A9A497; --rule:#2E2E26; --signal:#F0713F; --keep:#6FB58F;
+  }
+
+  *{box-sizing:border-box}
+  html{-webkit-text-size-adjust:100%}
+  body{
+    margin:0; background:var(--paper); color:var(--body);
+    font-family:var(--sans); font-size:17px; line-height:1.65;
+    font-synthesis-weight:none;
+  }
+  .wrap{width:min(100% - 2.5rem, 62rem); margin-inline:auto}
+  a{color:var(--ink); text-decoration-thickness:1px; text-underline-offset:3px}
+  a:hover{color:var(--signal)}
+  :focus-visible{outline:2px solid var(--signal); outline-offset:3px; border-radius:2px}
+
+  /* ── Opening ─────────────────────────────────────────────── */
+  header{padding-block:clamp(3.5rem,9vw,7rem) clamp(2.5rem,5vw,4rem)}
+  .kicker{
+    font-family:var(--mono); font-size:.72rem; letter-spacing:.18em;
+    text-transform:uppercase; color:var(--signal); margin:0 0 1.6rem;
+  }
+  h1{
+    font-family:var(--serif); font-weight:400;
+    font-size:clamp(3rem,10.5vw,7.5rem); line-height:.94;
+    letter-spacing:-.02em; color:var(--ink); margin:0;
+    text-wrap:balance;
+  }
+  h1 em{font-style:italic; color:var(--signal)}
+  .standfirst{
+    max-width:var(--measure); margin:2rem 0 0;
+    font-size:clamp(1.05rem,2.1vw,1.3rem); line-height:1.55; color:var(--ink);
+  }
+  .verdict{
+    margin:1.4rem 0 0; max-width:var(--measure);
+    font-family:var(--mono); font-size:.86rem; line-height:1.6;
+  }
+  .verdict b{color:var(--signal); font-weight:500}
+
+  .install{
+    margin-top:2.8rem; display:flex; flex-wrap:wrap; align-items:center; gap:.9rem 1.4rem;
+  }
+  code.cmd{
+    font-family:var(--mono); font-size:.85rem; color:var(--ink);
+    background:var(--paper-2); border:1px solid var(--rule);
+    padding:.7rem 1rem; border-radius:3px; white-space:nowrap;
+    overflow-x:auto; max-width:100%;
+  }
+  .install a{font-family:var(--mono); font-size:.82rem; letter-spacing:.02em}
+
+  /* ── Order section: different treatment from the checklist ── */
+  .order{
+    background:var(--paper-2); border-block:1px solid var(--rule);
+    padding-block:clamp(3rem,6vw,4.5rem); margin-top:clamp(1rem,4vw,3rem);
+  }
+  .section-label{
+    font-family:var(--mono); font-size:.72rem; letter-spacing:.16em;
+    text-transform:uppercase; color:var(--body); margin:0 0 .9rem;
+  }
+  h2{
+    font-family:var(--serif); font-weight:400; color:var(--ink);
+    font-size:clamp(2rem,5vw,3.1rem); line-height:1.06; letter-spacing:-.015em;
+    margin:0 0 1rem; text-wrap:balance;
+  }
+  .lede{max-width:var(--measure); margin:0 0 2.6rem; color:var(--body)}
+
+  .steps{list-style:none; margin:0; padding:0; counter-reset:step}
+  .steps li{
+    counter-increment:step; position:relative;
+    padding:1.35rem 0 1.35rem 3.4rem; border-top:1px solid var(--rule);
+    max-width:44rem;
+  }
+  .steps li:last-child{border-bottom:1px solid var(--rule)}
+  .steps li::before{
+    content:counter(step); position:absolute; left:0; top:1.35rem;
+    font-family:var(--serif); font-size:1.9rem; line-height:1; color:var(--signal);
+  }
+  .steps strong{display:block; color:var(--ink); font-weight:600; font-size:1.02rem; margin-bottom:.25rem}
+
+  /* ── Checklist ───────────────────────────────────────────── */
+  .checks{padding-block:clamp(3.5rem,7vw,5.5rem)}
+  .group{margin-top:clamp(2.5rem,5vw,4rem)}
+  .group:first-of-type{margin-top:2.5rem}
+  .group > h3{
+    font-family:var(--mono); font-size:.75rem; letter-spacing:.16em; text-transform:uppercase;
+    color:var(--ink); margin:0 0 .4rem; padding-bottom:.7rem; border-bottom:2px solid var(--ink);
+    max-width:44rem; display:flex; justify-content:space-between; gap:1rem; align-items:baseline;
+  }
+  .group > h3 span{color:var(--body); font-weight:400; letter-spacing:.04em; text-transform:none}
+  .items{list-style:none; margin:0; padding:0; counter-reset:item var(--start,0)}
+  .items li{
+    counter-increment:item; position:relative;
+    padding:1.5rem 0 1.5rem 3.4rem; border-bottom:1px solid var(--rule); max-width:44rem;
+  }
+  .items li::before{
+    content:counter(item); position:absolute; left:0; top:1.5rem;
+    font-family:var(--mono); font-size:.95rem; color:var(--body);
+  }
+  .items q{
+    display:block; quotes:none; color:var(--ink); font-weight:600;
+    font-size:1.06rem; line-height:1.35; margin-bottom:.45rem;
+  }
+  .items p{margin:0}
+  .items em{font-style:normal; color:var(--signal)}
+
+  /* ── Tests ───────────────────────────────────────────────── */
+  .tests{border-top:1px solid var(--rule); padding-block:clamp(3rem,6vw,4.5rem)}
+  .test{max-width:44rem; padding:1.4rem 0; border-bottom:1px solid var(--rule)}
+  .test h4{
+    margin:0 0 .3rem; color:var(--ink); font-size:1.02rem; font-weight:600;
+    font-family:var(--sans);
+  }
+  .test p{margin:0}
+
+  /* ── Close ───────────────────────────────────────────────── */
+  .close{padding-block:clamp(3.5rem,7vw,5.5rem)}
+  .close blockquote{
+    margin:0; max-width:40rem;
+    font-family:var(--serif); font-size:clamp(1.5rem,3.6vw,2.3rem);
+    line-height:1.22; color:var(--ink); letter-spacing:-.01em;
+  }
+  .close blockquote em{font-style:italic; color:var(--signal)}
+
+  footer{
+    border-top:1px solid var(--rule); padding-block:2.4rem 3.5rem;
+    font-family:var(--mono); font-size:.8rem; line-height:1.8;
+  }
+  footer p{margin:0; max-width:44rem}
+  .provenance{
+    margin-top:2rem; padding:1.3rem 1.4rem; background:var(--paper-2);
+    border-left:2px solid var(--signal); max-width:44rem;
+    font-family:var(--sans); font-size:.92rem; line-height:1.6;
+  }
+  .provenance b{color:var(--ink)}
+
+  @media (max-width:34rem){
+    body{font-size:16px}
+    .steps li,.items li{padding-left:2.6rem}
+    .steps li::before{font-size:1.5rem}
+  }
+</style>
+</head>
+<body>
+
+<header class="wrap">
+  <p class="kicker">A ship gate for design</p>
+  <h1>Twelve questions<br>before you call it <em>done</em>.</h1>
+  <p class="standfirst">A design can be technically fine — accessible, responsive, on-brand — and still read as machine-made. That failure has a small number of repeatable causes. Here they are.</p>
+  <p class="verdict">Run the list. <b>One “yes” means the page is not finished.</b></p>
+  <div class="install">
+    <code class="cmd">npx skills add systemonster/slop-check</code>
+    <a href="https://github.com/systemonster/slop-check">Source on GitHub&nbsp;↗</a>
+  </div>
+</header>
+
+<section class="order">
+  <div class="wrap">
+    <p class="section-label">Before the checklist</p>
+    <h2>Order matters.</h2>
+    <p class="lede">This is the part people skip, and it is the part that decides whether the rest can work. A step skipped here comes back later as slop you cannot name.</p>
+    <ol class="steps">
+      <li><strong>Typography before decoration.</strong> Establish hierarchy — scale, weight contrast, line length — before you touch color, shadow or radius. A page decorated on top of flat hierarchy cannot be rescued by styling.</li>
+      <li><strong>Layout comes from the content, not from a card grid.</strong> If “card grid” was the reflex answer, the layout was not designed. Ask what shape the content actually is.</li>
+      <li><strong>Spacing should be rhythmic and uneven.</strong> Giving every section the same vertical padding is the quietest source of template-feel. Build a rhythm: places that breathe, places that compress.</li>
+      <li><strong>Motion needs a doctrine.</strong> Motion must express hierarchy, time, or spatial logic. “It looks nice” does not pass. If removing an animation costs the reader nothing, remove it.</li>
+    </ol>
+  </div>
+</section>
+
+<section class="checks wrap">
+  <p class="section-label">The checklist</p>
+  <h2>Ask each one out loud.</h2>
+  <p class="lede">Phrased so that “yes” is the bad answer. Every rule is a default to break deliberately, not a law — breaking one on purpose, with a reason you can state, is design. Breaking one by reflex is slop.</p>
+
+  <div class="group">
+    <h3>A · Composition <span>most failures are here</span></h3>
+    <ol class="items">
+      <li><q>Template hero?</q><p>Hero → features → pricing, assembled by default rather than because the content asked for it.</p></li>
+      <li><q>Stock-photo hero?</q><p>Photo, headline overlaid, two buttons. This is the pattern <em>even when the photo is real and good.</em> Either the image is the hero, or there is no hero image.</p></li>
+      <li><q>Three equal cards?</q><p>An equal-width three-card grid as the reflex answer to “explain the benefits”. Fine when the content is genuinely three peers; never as a default.</p></li>
+      <li><q>Same skeleton, different paint?</q><p>Put it beside the previous page. If the only differences are color and border-radius, it is the same page twice. <em>What must differ: hero media type, the interactive module, the typeface pairing.</em></p></li>
+    </ol>
+  </div>
+
+  <div class="group">
+    <h3>B · Material <span>what it is made of</span></h3>
+    <ol class="items" style="--start:4">
+      <li><q>The default trio?</q><p>Purple-to-indigo gradient, Inter or Roboto as primary, uniform safe rounding. Present together, the page reads as generated no matter how well it is executed.</p></li>
+      <li><q>Gradient CTA?</q><p>A purple/indigo gradient button used as the default accent move.</p></li>
+      <li><q>Neutral sans everywhere?</q><p>All type flattened into quiet sans weights, with no hierarchy and no voice.</p></li>
+      <li><q>SaaS drift?</q><p>Generic SaaS polish applied when the brief called for editorial, cultural, luxury or sector work. <em>A hair salon should not look like Stripe.</em></p></li>
+    </ol>
+  </div>
+
+  <div class="group">
+    <h3>C · Motion and interaction <span>what moves, and why</span></h3>
+    <ol class="items" style="--start:8">
+      <li><q>Ornamental scroll?</q><p>Scroll-linked motion that does not change comprehension, pacing, or the meaning of a section. Cut it.</p></li>
+      <li><q>Unfinished interactive element?</q><p>If only <code>background-color</code> changes on hover, the element is not finished. <em>At least three things should move together — surface, position and shadow</em> — and the shadow should be a softened version of the element’s own color, not neutral black.</p></li>
+    </ol>
+  </div>
+
+  <div class="group">
+    <h3>D · Evidence and honesty <span>what you can defend</span></h3>
+    <ol class="items" style="--start:10">
+      <li><q>Style without evidence?</q><p>“I think it looks better” is not evidence. Cite a measured value, a spec, or data. If you claim a reference does something, <em>measure it</em> — do not eyeball it.</p></li>
+      <li><q>Fabricated proof?</q><p>Testimonials, star ratings, client logos, “N happy customers”, award badges, suspiciously precise percentages. No source, no place on the page — including on demos and concept work.</p></li>
+    </ol>
+  </div>
+</section>
+
+<section class="tests wrap">
+  <p class="section-label">When there is more than one page</p>
+  <h2>Three tests you can actually run.</h2>
+  <p class="lede">Subjective arguments about sameness end quickly once you measure them.</p>
+  <div class="test">
+    <h4>The skeleton test</h4>
+    <p>Describe each page’s mobile first screen in six words. If two pages get the same six words, it is a template.</p>
+  </div>
+  <div class="test">
+    <h4>The greyscale blind test</h4>
+    <p>Desaturate the thumbnails and look again. Can you still tell them apart? This is where “you just changed the colors” gets caught.</p>
+  </div>
+  <div class="test">
+    <h4>The five-second rule</h4>
+    <p>When the opening moment ends, is the phone number, the booking button or the price on screen? A page that dazzles and then hides the job has not done the job.</p>
+  </div>
+</section>
+
+<section class="close wrap">
+  <blockquote>The rules outlived the machinery that produced them. That is the whole argument for <em>writing guardrails down</em> separately from the system that generated them.</blockquote>
+
+  <div class="provenance">
+    <p>This list began as two tables in a design-intelligence project that had ingested about <b>2,600 Awwwards Site-of-the-Day winners</b>. The project was retired. Measuring it on the way out was instructive: <b>73%</b> of its generated design specs were too weak to use, and <b>38%</b> of its stored reference screenshots turned out to be blank frames, preloaders, cookie walls, or captures of domains that had since expired.</p>
+    <p style="margin-top:.8rem">Sections A–D were then rewritten against real client rejections. Rules 2, 4 and 10 each come from a specific moment when someone pointed at a screen and called it cheap.</p>
+  </div>
+</section>
+
+<footer class="wrap">
+  <p>MIT licensed · <a href="https://github.com/systemonster/slop-check">github.com/systemonster/slop-check</a></p>
+  <p>Built by <a href="https://lovefengis.com">lovefengis</a>, a web and software studio in İzmir, Türkiye.</p>
+</footer>
+
+</body>
+</html>
