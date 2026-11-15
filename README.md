@@ -44,4 +44,4 @@ Rules earn their place by catching something real. If you open a PR adding one, 
 
 MIT — see [LICENSE](LICENSE).
 
-Built by [lovefengis](https://lovefengis.com), a web and software studio in İzmir, Türkiye.
+Built by [lovefengis](https://lovefengis.com), a digital agency serving clients across Türkiye remotely.
